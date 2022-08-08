@@ -13,5 +13,13 @@ router.post('/',(req,res,next)=>{
     LoginSuccess: login
 })
 })
+router.post('/NewUser',(req,res,next)=>{
+    const NewUser ={ NewEmail: req.body.NewEmail, NewPassWord: req.body.NewPassWord}
+    res.status(200).send({
+      mensagem:'Usuário criado com sucesso!',
+      UserCreateSuccess: NewUser
+  })
+})
+
 
 module.exports = router
