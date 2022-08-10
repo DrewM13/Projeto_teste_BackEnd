@@ -1,25 +1,67 @@
 const express = require('express')
 const router = express.Router()
+const mysql =require('../MySql').pool
+const bcrypt = require('bcrypt')
 
-router.get('/',(req,res,next)=>{
-    res.status(200).send({
-        mensagem:'Usando o GET dentro da rota de login'
-    })
-})
-router.post('/',(req,res,next)=>{
-  const login ={ Email: req.body.Email, PassWord: req.body.PassWord}
-  res.status(200).send({
-    mensagem:'Login realizado com sucesso!',
-    LoginSuccess: login
-})
-})
+
 router.post('/NewUser',(req,res,next)=>{
-    const NewUser ={ NewEmail: req.body.NewEmail, NewPassWord: req.body.NewPassWord}
-    res.status(200).send({
-      mensagem:'Usuário criado com sucesso!',
-      UserCreateSuccess: NewUser
+  mysql.getConnection((err,conn)=>{
+    if(err){return res.status(500).send({error:err})}
+    bcrypt.hash(req.body.UserPW,10,(errBcrypt,hash)=>{
+if(errBcrypt){return res.status(500).send({error:errBcrypt})}
+conn.query('SELECT * FROM Users WHERE UserMail=?',[req.body.UserMail],(error,results)=>{
+  if(error){return res.status(500).send({error:error})}
+  if(results.length>0){
+    res.status(409).send({ mensagem:"Usuário já cadastrado"})
+  }
+  else{
+    conn.query(`INSERT INTO Users(UserMail,UserPW) VALUES (?,?)`,
+[req.body.UserMail,hash],
+(error,results)=>{
+  conn.release()
+  if(error){ return res.status(500).send({error:error})}
+  response = {
+    mensagem:'Usuário criado com sucesso',
+    usuarioCriado: {email:req.body.NewUserMail, id_usuario: results.insertId}
+  }
+  return res.status(201).send(response)
+}
+)
+
+  }
+})
+
+    })
+  })
+  })
+
+router.post('/login',(req,res,next)=>{
+  mysql.getConnection((error,conn)=>{
+    if(error){return res.status(500).send({error:error})}
+    const query='SELECT * FROM Users WHERE UserMail=?'
+    conn.query(
+     query,[req.body.UserMail],
+      (error,result,field)=>{
+        conn.release()
+        if(error){res.status(500).send({error:error})}
+
+        if(result.length<1){return res.status(401).send({mensagem:'Falha na autenticação'})}
+
+        bcrypt.compare(req.body.UserPW,result[0].UserPW,(error,result)=>{
+          
+          if(error){ return res.status(401).send({mensagem:'Falha na autenticação'})}
+
+         if(result){ return res.status(200).send({mensagem:'Autenticado com sucesso'})}
+
+         return res.status(401).send({mensagem:'Falha na autenticação'})
+        })
+      }
+    )
   })
 })
+
+
+
 
 
 module.exports = router
