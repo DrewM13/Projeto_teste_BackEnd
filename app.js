@@ -24,8 +24,10 @@ res.setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Ori
 });
 const rotaLogin = require('./routes/login')
 const rotaClient = require('./routes/client')
+const rotaAdm = require('./routes/adm')
 
 app.use('/credentials', rotaLogin)
 app.use('/clients', rotaClient)
+app.use('/adm', rotaAdm)
 
 module.exports = app
