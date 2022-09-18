@@ -1,15 +1,18 @@
 const express = require('express')
 const router = express.Router()
 const mysql =require('../MySql').pool
+const token = require('../routes/token')
+// const bcrypt = require('bcrypt')
+// const jwt = require('jsonwebtoken')
 
 //Cria o usuário
-router.post('/AddUser',(req,res,next)=>{
+router.post('/AddUser',token,(req,res,next)=>{
   mysql.getConnection((err,conn)=>{
     if(err){return res.status(500).send({error:err})}
-conn.query('SELECT * FROM Adm_users' ,(error,results)=>{
+conn.query('SELECT * FROM Users' ,(error,results)=>{
   if(error){return res.status(500).send({error:error})}
   else{
-    conn.query(`INSERT INTO Adm_users(Usuario, Senha, EditarCriar, Excluir, Adm,Email) VALUES (?,?,?,?,?,?)`,[req.body.Usuario,req.body.Senha,req.body.EditarCriar,req.body.Excluir,req.body.Adm, req.body.Email],
+    conn.query(`INSERT INTO Users(username, password, Adm,email) VALUES (?,?,?,?,?,?)`,[req.body.username,req.body.password,req.body.Adm, req.body.email],
 (error,results)=>{
   conn.release()
   if(error){ return res.status(500).send({error:error})}
@@ -23,13 +26,13 @@ conn.query('SELECT * FROM Adm_users' ,(error,results)=>{
 })
 })
 //Altera os dados do usuário
-router.patch('/:idAdm',(req,res,next)=>{
+router.patch('/:idAdm',token,(req,res,next)=>{
   mysql.getConnection((err,conn)=>{
     if(err){return res.status(500).send({error:err})}
-conn.query('SELECT * FROM Adm_users' ,(error,results)=>{
+conn.query('SELECT * FROM Users' ,(error,results)=>{
   if(error){return res.status(500).send({error:error})}
   else{
-    conn.query(`UPDATE Adm_users SET Usuario = ?, Senha=?, EditarCriar=?, Excluir=?, Adm=?, Email=? WHERE idAdm =?`,[req.body.Usuario,req.body.Senha,req.body.EditarCriar,req.body.Excluir,req.body.Adm, req.body.Email,req.body.idAdm],
+    conn.query(`UPDATE Users SET username = ?, password=?, Adm=?, email=? WHERE idUsers =?`,[req.body.username,req.body.password,req.body.Adm, req.body.email,req.body.idUsers],
 (error,results)=>{
   conn.release()
   if(error){ return res.status(500).send({error:error})}
@@ -43,10 +46,10 @@ conn.query('SELECT * FROM Adm_users' ,(error,results)=>{
 })
 })
 //Mostra todos os usuários
-router.get('/',(req,res,next)=>{
+router.get('/',token,(req,res,next)=>{
     mysql.getConnection((error,conn)=>{
         if(error){ return res.status(500).send({error:error})}
-        conn.query('SELECT * FROM Adm_users;',
+        conn.query('SELECT * FROM Users;',
         (error,result,fields)=>{
             if(error){ return res.status(500).send({error:error})}
             return res.status(200).send({data:result})
@@ -55,10 +58,10 @@ router.get('/',(req,res,next)=>{
     })
 })
 //Mostra somente o usuário do id
-router.get('/:idAdm',(req,res,next)=>{
+router.get('/:idUsers',token,(req,res,next)=>{
     mysql.getConnection((error,conn)=>{
         if(error){ return res.status(500).send({error:error})}
-        conn.query('SELECT * FROM Adm_users WHERE idAdm=?;',[req.params.idAdm],
+        conn.query('SELECT * FROM Users WHERE idUsers=?;',[req.params.idUsers],
         (error,result,fields)=>{
             if(error){ return res.status(500).send({error:error})}
             return res.status(200).send({data:result})
@@ -67,10 +70,10 @@ router.get('/:idAdm',(req,res,next)=>{
     })
 })
 //Exclui um usuário
-router.delete('/:idAdm',(req,res,next)=>{
+router.delete('/:idUsers',token,(req,res,next)=>{
     mysql.getConnection((error,conn)=>{
         if(error){ return res.status(500).send({error:error})}
-        conn.query('DELETE FROM Adm_users WHERE idAdm=?;',[req.params.idAdm],
+        conn.query('DELETE FROM Users WHERE idUsers=?;',[req.params.idUsers],
         (error,result,fields)=>{
             if(error){ return res.status(500).send({error:error})}
             return res.status(202).send({mensagem:'Usuário excluído com sucesso'})
@@ -78,8 +81,4 @@ router.delete('/:idAdm',(req,res,next)=>{
         )
     })
 })
-
-
-
-
 module.exports = router
