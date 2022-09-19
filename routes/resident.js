@@ -1,22 +1,22 @@
 const express = require('express')
 const router = express.Router()
 const mysql =require('../MySql').pool
-const login = require('../routes/login')
+const token = require('../routes/token')
 
 //Cria o cliente
-router.post('/AddClient',login,(req,res,next)=>{
+router.post('/AddResident',token,(req,res,next)=>{
   mysql.getConnection((err,conn)=>{
     if(err){return res.status(500).send({error:err})}
 conn.query('SELECT * FROM DadosCliente' ,(error,results)=>{
   if(error){return res.status(500).send({error:error})}
   else{
-    conn.query(`INSERT INTO DadosCliente(Nome, Telefone, Email, Celular, CPF) VALUES (?,?,?,?,?)`,[req.body.Nome,req.body.Telefone,req.body.Email,req.body.Celular,req.body.CPF],
+    conn.query(`INSERT INTO Residents(name) VALUES (?)`,[req.body.name],
 (error,results)=>{
   conn.release()
   if(error){ return res.status(500).send({error:error})}
   response = {
-    mensagem:'Cliente criado com sucesso',
-    clienteCriado: {data:req.body}
+    mensagem:'Residente criado com sucesso',
+    moradorCriado: {data:req.body}
   }
   return res.status(201).send(response)
 })}
@@ -24,18 +24,18 @@ conn.query('SELECT * FROM DadosCliente' ,(error,results)=>{
 })
 })
 //Altera os dados do cliente
-router.patch('/:idClient',login,(req,res,next)=>{
+router.patch('/:idResident',token,(req,res,next)=>{
   mysql.getConnection((err,conn)=>{
     if(err){return res.status(500).send({error:err})}
-conn.query('SELECT * FROM DadosCliente' ,(error,results)=>{
+conn.query('SELECT * FROM Residents' ,(error,results)=>{
   if(error){return res.status(500).send({error:error})}
   else{
-    conn.query(`UPDATE DadosCliente SET Nome = ?, Telefone=?, Email=?, Celular=?, CPF=? WHERE idClient =?`,[req.body.Nome,req.body.Telefone,req.body.Email,req.body.Celular,req.body.CPF,req.params.idClient],
+    conn.query(`UPDATE Residents SET name = ?WHERE idClient =?`,[req.body.Nome,req.params.idResidents],
 (error,results)=>{
   conn.release()
   if(error){ return res.status(500).send({error:error})}
   response = {
-    mensagem:'Cliente alterado com sucesso',
+    mensagem:'Residente alterado com sucesso',
     clienteAlterado: {data:req.body}
   }
   return res.status(202).send(response)
@@ -44,10 +44,10 @@ conn.query('SELECT * FROM DadosCliente' ,(error,results)=>{
 })
 })
 //Mostra todos os clientes
-router.get('/',login,(req,res,next)=>{
+router.get('/',token,(req,res,next)=>{
     mysql.getConnection((error,conn)=>{
         if(error){ return res.status(500).send({error:error})}
-        conn.query('SELECT * FROM DadosCliente;',
+        conn.query('SELECT * FROM Residents;',
         (error,result,fields)=>{
             if(error){ return res.status(500).send({error:error})}
             return res.status(200).send({data:result})
@@ -56,10 +56,10 @@ router.get('/',login,(req,res,next)=>{
     })
 })
 //Mostra somente o cliente do id
-router.get('/:idClient',login,(req,res,next)=>{
+router.get('/:idResidents',token,(req,res,next)=>{
     mysql.getConnection((error,conn)=>{
         if(error){ return res.status(500).send({error:error})}
-        conn.query('SELECT * FROM DadosCliente WHERE idClient=?;',[req.params.idClient],
+        conn.query('SELECT * FROM Residents WHERE idResidents=?;',[req.params.idResidents],
         (error,result,fields)=>{
             if(error){ return res.status(500).send({error:error})}
             return res.status(200).send({data:result})
@@ -68,13 +68,13 @@ router.get('/:idClient',login,(req,res,next)=>{
     })
 })
 //Exclui um cliente
-router.delete('/:idClient',login,(req,res,next)=>{
+router.delete('/:idResidents',token,(req,res,next)=>{
     mysql.getConnection((error,conn)=>{
         if(error){ return res.status(500).send({error:error})}
-        conn.query('DELETE FROM DadosCliente WHERE idClient=?;',[req.params.idClient],
+        conn.query('DELETE FROM Residents WHERE idResident=?;',[req.params.idResidents],
         (error,result,fields)=>{
             if(error){ return res.status(500).send({error:error})}
-            return res.status(202).send({mensagem:'Cliente excluído com sucesso'})
+            return res.status(202).send({mensagem:'Residente excluído com sucesso'})
         }
         )
     })
