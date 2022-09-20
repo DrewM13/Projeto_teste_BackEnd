@@ -15,6 +15,7 @@ router.post('/',(req,res,next)=>{
         if(error){res.status(500).send({error:error})}
 
         if(result.length<1){return res.status(401).send({mensagem:'Falha na autenticação'})}
+        if(req.body.password !== result[0].password){return res.status(403).send({mensagem:'Falha na autenticação'})}
 
          if(result){
           let token = jwt.sign({
@@ -22,32 +23,10 @@ router.post('/',(req,res,next)=>{
             email:result[0].email
           }, 'secretKey',{expiresIn:'1h'})
           return res.status(200).send({mensagem:'Autenticado com sucesso', token:token})}
-        // bcrypt.compare(req.body.password,result[0].password,(error,result)=>{
-          
-        //   if(error){ return res.status(401).send({mensagem:'Falha na autenticação'})}
-
-
-        //  return res.status(401).send({mensagem:'Falha na autenticação', data:res})
-        // })
       }
     )
   })
 })
-// const tokens = (req,res,next)=>{
-//   console.log(req.body);
-//   try{
-//       const decode = jwt.verify(req.body.token,'secretKey')
-//       req.usernameData = decode
-//       next()
-//   }
-//   catch(error){
-//       return res.status(401).send({mensagem:'Falha na autenticação'})
-//   }
-// }
-
-// module.exports = tokens
-
-
 
 // router.post('/NewUser',(req,res,next)=>{
 //   mysql.getConnection((err,conn)=>{

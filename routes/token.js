@@ -1,12 +1,12 @@
 const jwt = require('jsonwebtoken')
 const token = (req,res,next)=>{
     try{
-        const decode = jwt.verify(req.body.token,'secretKey')
+        const decode = jwt.verify(req.headers.authorization,'secretKey')
         req.userData = decode
         next()
     }
     catch(error){
-        return res.status(401).send({mensagem:'Falha na autenticação', token:req.body})
+        return res.status(401).send({mensagem:'Falha na autenticação'})
     }
   }
   

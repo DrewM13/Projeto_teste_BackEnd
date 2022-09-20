@@ -2,8 +2,6 @@ const express = require('express')
 const router = express.Router()
 const mysql =require('../MySql').pool
 const token = require('../routes/token')
-// const bcrypt = require('bcrypt')
-// const jwt = require('jsonwebtoken')
 
 //Cria o usuário
 router.post('/AddUser',token,(req,res,next)=>{
@@ -12,13 +10,13 @@ router.post('/AddUser',token,(req,res,next)=>{
 conn.query('SELECT * FROM Users' ,(error,results)=>{
   if(error){return res.status(500).send({error:error})}
   else{
-    conn.query(`INSERT INTO Users(username, password, Adm,email) VALUES (?,?,?,?,?,?)`,[req.body.username,req.body.password,req.body.Adm, req.body.email],
+    conn.query(`INSERT INTO Users(username, password, Adm,email) VALUES (?,?,?,?)`,[req.body.username,req.body.password,req.body.Adm, req.body.email],
 (error,results)=>{
   conn.release()
   if(error){ return res.status(500).send({error:error})}
   response = {
     mensagem:'Usuário criado com sucesso',
-    usuarioCriado: {data:req.body}
+    usuarioCriado: {data:req.body.data}
   }
   return res.status(201).send(response)
 })}
@@ -26,7 +24,7 @@ conn.query('SELECT * FROM Users' ,(error,results)=>{
 })
 })
 //Altera os dados do usuário
-router.patch('/:idAdm',token,(req,res,next)=>{
+router.put('/:idUsers',token,(req,res,next)=>{
   mysql.getConnection((err,conn)=>{
     if(err){return res.status(500).send({error:err})}
 conn.query('SELECT * FROM Users' ,(error,results)=>{
@@ -37,8 +35,7 @@ conn.query('SELECT * FROM Users' ,(error,results)=>{
   conn.release()
   if(error){ return res.status(500).send({error:error})}
   response = {
-    mensagem:'Usuário alterado com sucesso',
-    usuarioAlterado: {data:req.body}
+data:req.body
   }
   return res.status(202).send(response)
 })}
@@ -76,7 +73,7 @@ router.delete('/:idUsers',token,(req,res,next)=>{
         conn.query('DELETE FROM Users WHERE idUsers=?;',[req.params.idUsers],
         (error,result,fields)=>{
             if(error){ return res.status(500).send({error:error})}
-            return res.status(202).send({mensagem:'Usuário excluído com sucesso'})
+            return res.status(202).send({mensagem:'Morador excluído com sucesso'})
         }
         )
     })
